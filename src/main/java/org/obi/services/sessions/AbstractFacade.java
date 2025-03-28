@@ -6,6 +6,14 @@
 package org.obi.services.sessions;
 
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.obi.services.Form.DatabaseFrame;
+import org.obi.services.model.DatabaseModel;
+import org.obi.services.sessions.business.EntitiesFacade;
+import org.obi.services.sessions.tags.TagsFacade;
+import org.obi.services.util.Util;
 
 /**
  *
@@ -19,17 +27,49 @@ public abstract class AbstractFacade<T> {
     public AbstractFacade(Class<T> entityClass) {
         this.entityClass = entityClass;
     }
-    
-    public AbstractFacade(){
-        
+
+    public AbstractFacade() {
+
     }
 
-    protected abstract Connection getConnectionMannager();
+    //protected abstract Connection getConnectionMannager();
+
+    protected Connection conn = null;
     
+    protected  Connection getConnectionMannager() {
+        int requestTest = 0;
+        while (requestTest <= 2) {
+            if (conn == null) {
+                conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
+            } else try {
+                if (conn.isClosed()) {
+                    conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
+                }
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + EntitiesFacade.class.getSimpleName()
+                        + " >> getConnectionMannager on DatabaseFrame.toConnection : " + ex.getLocalizedMessage());
+                Logger.getLogger(TagsFacade.class.getName()).log(Level.SEVERE, null, ex);
+                conn = null;
+            }
+
+            if (conn == null) {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(EntitiesFacade.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+                requestTest = 2;
+            }
+            requestTest++;
+        }
+
+        return conn;
+    }
+
 //    protected abstract T getEntity();
 //    
 //    protected abstract void updateEntity(ResultSet rs);
-
 //    /**
 //     * General method to process a find process from an established query
 //     *
@@ -63,7 +103,6 @@ public abstract class AbstractFacade<T> {
 //        }
 //        return lst;
 //    }
-
 //    //protected abstract EntityManager getEntityManager();
 //
 //    public void create(T entity) {

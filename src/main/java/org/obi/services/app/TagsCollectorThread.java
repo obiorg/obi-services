@@ -321,6 +321,7 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
                     if (!tags.isEmpty()) {
 
                         // Now process each tags
+                        int badReadingRequestCounter = 0;
                         for (Tags tag : tags) {
 
                             // Collect only if cyle time is reached since last change
@@ -365,6 +366,15 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
                                             && !Double.isNaN(tag.getVFloat())) {
                                         pushFacadeThread.addNewTag(tag); // in order to post-pose processing.
                                     } else {
+                                        mc.close();
+                                        for (int j = 0; j < systemThreadListeners.size(); j++) {
+                                            systemThreadListeners.get(j).onErrorCollection(this, Util.errLine() + methodName + " read return null " + tag.getType() + " for tag " + tag + " close connection");
+                                        }
+                                        if (mc.getConnected()) {
+                                            Util.out(Util.errLine() + methodName + " after closing connection is still on for machine " + getName() + " !");
+                                        } else {
+                                            Util.out(Util.errLine() + methodName + " after closing connection is correctly close for machine " + getName() + " !");
+                                        }
                                         break;
                                     }
                                 } else {

@@ -18,7 +18,7 @@ import org.obi.services.util.Util;
  *
  * @author r.hendrick
  */
-public class MeasComparatorsFacade {
+public class MeasComparatorsFacade extends AbstractFacade<MeasComparators>{
 
     private static MeasComparatorsFacade INSTANCE;
 
@@ -32,22 +32,22 @@ public class MeasComparatorsFacade {
     public MeasComparatorsFacade() {
     }
 
-    Connection conn = null;
-
-    protected Connection getConnectionMannager() {
-        if (conn == null) {
-            conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
-        } else try {
-            if (conn.isClosed()) {
-                conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
-            }
-        } catch (SQLException ex) {
-            Util.out(Util.errLine() + MeasComparatorsFacade.class.getSimpleName()
-                    + " >> getConnectionMannager on DatabaseFrame.toConnection : " + ex.getLocalizedMessage());
-            Logger.getLogger(MeasComparatorsFacade.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return conn;
-    }
+//    Connection conn = null;
+//
+//    protected Connection getConnectionMannager() {
+//        if (conn == null) {
+//            conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
+//        } else try {
+//            if (conn.isClosed()) {
+//                conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
+//            }
+//        } catch (SQLException ex) {
+//            Util.out(Util.errLine() + MeasComparatorsFacade.class.getSimpleName()
+//                    + " >> getConnectionMannager on DatabaseFrame.toConnection : " + ex.getLocalizedMessage());
+//            Logger.getLogger(MeasComparatorsFacade.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        return conn;
+//    }
 
     /**
      * Allow to initialize conenction or use it if not exist

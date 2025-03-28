@@ -18,7 +18,7 @@ import org.obi.services.util.Util;
  *
  * @author r.hendrick
  */
-public class PersStandardLimitsFacade {
+public class PersStandardLimitsFacade extends AbstractFacade<PersStandardLimits>{
 
     private static PersStandardLimitsFacade INSTANCE;
 
@@ -32,22 +32,22 @@ public class PersStandardLimitsFacade {
     public PersStandardLimitsFacade() {
     }
 
-    Connection conn = null;
-
-    protected Connection getConnectionMannager() {
-        if (conn == null) {
-            conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
-        } else try {
-            if (conn.isClosed()) {
-                conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
-            }
-        } catch (SQLException ex) {
-            Util.out(Util.errLine() + PersStandardLimitsFacade.class.getSimpleName()
-                    + " >> getConnectionMannager on DatabaseFrame.toConnection : " + ex.getLocalizedMessage());
-            Logger.getLogger(PersStandardLimitsFacade.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return conn;
-    }
+//    Connection conn = null;
+//
+//    protected Connection getConnectionMannager() {
+//        if (conn == null) {
+//            conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
+//        } else try {
+//            if (conn.isClosed()) {
+//                conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
+//            }
+//        } catch (SQLException ex) {
+//            Util.out(Util.errLine() + PersStandardLimitsFacade.class.getSimpleName()
+//                    + " >> getConnectionMannager on DatabaseFrame.toConnection : " + ex.getLocalizedMessage());
+//            Logger.getLogger(PersStandardLimitsFacade.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        return conn;
+//    }
 
     /**
      * Allow to initialize conenction or use it if not exist

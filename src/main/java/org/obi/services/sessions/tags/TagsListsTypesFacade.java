@@ -18,7 +18,7 @@ import org.obi.services.util.Util;
  *
  * @author r.hendrick
  */
-public class TagsListsTypesFacade {
+public class TagsListsTypesFacade extends AbstractFacade<TagsListsTypes>{
 
     private static TagsListsTypesFacade INSTANCE;
 
@@ -32,21 +32,21 @@ public class TagsListsTypesFacade {
     public TagsListsTypesFacade() {
     }
 
-    Connection conn = null;
-
-    protected Connection getConnectionMannager() {
-        if (conn == null) {
-            conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
-        } else try {
-            if (conn.isClosed()) {
-                conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
-            }
-        } catch (SQLException ex) {
-            Util.out("TagsListsTypesFacade >> getConnectionMannager on DatabaseFrame.toConnection : " + ex.getLocalizedMessage());
-            Logger.getLogger(TagsFacade.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return conn;
-    }
+//    Connection conn = null;
+//
+//    protected Connection getConnectionMannager() {
+//        if (conn == null) {
+//            conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
+//        } else try {
+//            if (conn.isClosed()) {
+//                conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
+//            }
+//        } catch (SQLException ex) {
+//            Util.out("TagsListsTypesFacade >> getConnectionMannager on DatabaseFrame.toConnection : " + ex.getLocalizedMessage());
+//            Logger.getLogger(TagsFacade.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        return conn;
+//    }
 
     /**
      * Allow to initialize conenction or use it if not exist

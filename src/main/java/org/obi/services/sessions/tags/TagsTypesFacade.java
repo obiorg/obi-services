@@ -18,7 +18,7 @@ import org.obi.services.util.Util;
  *
  * @author r.hendrick
  */
-public class TagsTypesFacade {
+public class TagsTypesFacade extends AbstractFacade<TagsTypes> {
 
     private static TagsTypesFacade INSTANCE;
 
@@ -32,26 +32,27 @@ public class TagsTypesFacade {
     public TagsTypesFacade() {
     }
 
-    Connection conn = null;
-
-    protected Connection getConnectionMannager() {
-        if (conn == null) {
-            conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
-        } else try {
-            if (conn.isClosed()) {
-                conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
-            }
-        } catch (SQLException ex) {
-            Util.out("TagsTypesFacade >> getConnectionMannager on DatabaseFrame.toConnection : " + ex.getLocalizedMessage());
-            Logger.getLogger(TagsFacade.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return conn;
-    }
+//    Connection conn = null;
+//
+//    protected Connection getConnectionMannager() {
+//        if (conn == null) {
+//            conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
+//        } else try {
+//            if (conn.isClosed()) {
+//                conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
+//            }
+//        } catch (SQLException ex) {
+//            Util.out("TagsTypesFacade >> getConnectionMannager on DatabaseFrame.toConnection : " + ex.getLocalizedMessage());
+//            Logger.getLogger(TagsFacade.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        return conn;
+//    }
 
     /**
      * Allow to initialize conenction or use it if not exist
      *
      * @return
+     * @throws java.sql.SQLException
      */
     public Boolean isConnectionOn() throws SQLException {
         if (conn == null) {

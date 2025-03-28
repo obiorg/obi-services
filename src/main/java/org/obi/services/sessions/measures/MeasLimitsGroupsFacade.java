@@ -18,7 +18,7 @@ import org.obi.services.util.Util;
  *
  * @author r.hendrick
  */
-public class MeasLimitsGroupsFacade {
+public class MeasLimitsGroupsFacade extends AbstractFacade<MeasLimitsGroups>{
 
     private static MeasLimitsGroupsFacade INSTANCE;
 
@@ -32,22 +32,22 @@ public class MeasLimitsGroupsFacade {
     public MeasLimitsGroupsFacade() {
     }
 
-    Connection conn = null;
-
-    protected Connection getConnectionMannager() {
-        if (conn == null) {
-            conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
-        } else try {
-            if (conn.isClosed()) {
-                conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
-            }
-        } catch (SQLException ex) {
-            Util.out(Util.errLine() + MeasLimitsGroupsFacade.class.getSimpleName()
-                    + " >> getConnectionMannager on DatabaseFrame.toConnection : " + ex.getLocalizedMessage());
-            Logger.getLogger(MeasLimitsGroupsFacade.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return conn;
-    }
+//    Connection conn = null;
+//
+//    protected Connection getConnectionMannager() {
+//        if (conn == null) {
+//            conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
+//        } else try {
+//            if (conn.isClosed()) {
+//                conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
+//            }
+//        } catch (SQLException ex) {
+//            Util.out(Util.errLine() + MeasLimitsGroupsFacade.class.getSimpleName()
+//                    + " >> getConnectionMannager on DatabaseFrame.toConnection : " + ex.getLocalizedMessage());
+//            Logger.getLogger(MeasLimitsGroupsFacade.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        return conn;
+//    }
 
     /**
      * Allow to initialize conenction or use it if not exist

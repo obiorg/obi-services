@@ -19,7 +19,7 @@ import org.obi.services.util.Util;
  *
  * @author r.hendrick
  */
-public class EntitiesFacade {
+public class EntitiesFacade extends AbstractFacade<Entities>{
 
     private static EntitiesFacade INSTANCE;
 
@@ -33,21 +33,38 @@ public class EntitiesFacade {
     public EntitiesFacade() {
     }
 
-    Connection conn = null;
+//    Connection conn = null;
 
-    protected Connection getConnectionMannager() {
-        if (conn == null) {
-            conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
-        } else try {
-            if (conn.isClosed()) {
-                conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
-            }
-        } catch (SQLException ex) {
-            Util.out("EntitiesFacade >> getConnectionMannager on DatabaseFrame.toConnection : " + ex.getLocalizedMessage());
-            Logger.getLogger(TagsFacade.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return conn;
-    }
+//    protected Connection getConnectionMannager() {
+//        int requestTest = 0;
+//        while (requestTest <= 2) {
+//            if (conn == null) {
+//                conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
+//            } else try {
+//                if (conn.isClosed()) {
+//                    conn = DatabaseFrame.toConnection(DatabaseModel.databaseModel());
+//                }
+//            } catch (SQLException ex) {
+//                Util.out(Util.errLine() + EntitiesFacade.class.getSimpleName()
+//                        + " >> getConnectionMannager on DatabaseFrame.toConnection : " + ex.getLocalizedMessage());
+//                Logger.getLogger(TagsFacade.class.getName()).log(Level.SEVERE, null, ex);
+//                conn = null;
+//            }
+//
+//            if (conn == null) {
+//                try {
+//                    Thread.sleep(5000);
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(EntitiesFacade.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }else{
+//                requestTest = 2;
+//            }
+//            requestTest++;
+//        }
+//
+//        return conn;
+//    }
 
     /**
      * General method to process a find process from an established query
@@ -117,7 +134,8 @@ public class EntitiesFacade {
     /**
      * Find an element specified by entity
      *
-     * Use request : "SELECT * FROM dbo.entities WHERE entity = '" + entity + "'"
+     * Use request : "SELECT * FROM dbo.entities WHERE entity = '" + entity +
+     * "'"
      *
      * @return entity or null if empty
      */

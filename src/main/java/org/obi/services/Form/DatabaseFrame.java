@@ -352,7 +352,7 @@ public class DatabaseFrame extends javax.swing.JDialog {
             Connection conn = DriverManager.getConnection(url, model.getUser(), model.getPassword());
             return conn;
         } catch (ClassNotFoundException | SQLException ex) {
-            Util.out(DatabaseFrame.class.getName() + " >> isConnectable(DatabaseModel model) for url(" + url + ") : " + ex.getLocalizedMessage());
+            Util.out(DatabaseFrame.class.getName() + " >> toConnection(DatabaseModel model) for url(" + url + ") : " + ex.getLocalizedMessage());
             return null;
         }
     }
