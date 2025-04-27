@@ -1,6 +1,5 @@
 package org.obi.services.sessions.persistence;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,11 +10,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.obi.services.Form.DatabaseFrame;
 import org.obi.services.entities.persistence.PersStandard;
 import org.obi.services.entities.persistence.Persistence;
 import org.obi.services.entities.tags.Tags;
-import org.obi.services.model.DatabaseModel;
 import org.obi.services.sessions.AbstractFacade;
 import org.obi.services.util.Util;
 
@@ -23,7 +20,7 @@ import org.obi.services.util.Util;
  *
  * @author r.hendrick
  */
-public class PersStandardFacade extends AbstractFacade<PersStandard>{
+public class PersStandardFacade extends AbstractFacade<PersStandard> {
 
     private static PersStandardFacade INSTANCE;
 
@@ -53,7 +50,6 @@ public class PersStandardFacade extends AbstractFacade<PersStandard>{
 //        }
 //        return conn;
 //    }
-
     /**
      * Allow to initialize conenction or use it if not exist
      *
@@ -158,7 +154,8 @@ public class PersStandardFacade extends AbstractFacade<PersStandard>{
      * @param tagsPersistence tags data to push
      * @throws java.sql.SQLException error on inserting
      */
-    public Boolean pushValue(List<Persistence> persistenceUpdating, List<Tags> tagsPersistence) {
+    public Boolean pushValue(List<Persistence> persistenceUpdating,
+            List<Tags> tagsPersistence) {
 
         // Will request prepare statement and push all at once
         String query = "INSERT INTO pers_standard "
@@ -210,7 +207,6 @@ public class PersStandardFacade extends AbstractFacade<PersStandard>{
         for (Tags tag : tagsPersistence) {
 
             //Util.out("PersStandardFacade >> persValue : " + tag.toStringFull());
-
             // Check if active persistence is enable on the tags
             if (tag.getPersistenceEnable()) {
                 // Check if enable for persistence
@@ -331,6 +327,176 @@ public class PersStandardFacade extends AbstractFacade<PersStandard>{
             conn.setAutoCommit(false);
         } catch (SQLException ex) {
             Logger.getLogger(PersStandardFacade.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return true;
+
+    }
+
+    /**
+     * Allow to write persistance standard objects in to pers_standard table
+     * @param persistence
+     * @return 
+     */
+    public Boolean pushValue(List<PersStandard> persistence) {
+
+        // Will request prepare statement and push all at once
+        String query = "INSERT INTO pers_standard "
+                + "           ([company] "
+                + "           ,[tag] "
+                + "           ,[vFloat] "
+                + "           ,[vInt] "
+                + "           ,[vBool] "
+                + "           ,[vStr] "
+                + "           ,[vDateTime] "
+                + "           ,[vStamp] "
+                + "           ,[stampStart] "
+                + "           ,[stampEnd] "
+                + "           ,[tbf] "
+                + "           ,[ttr] "
+                + "           ,[error] "
+                + "           ,[errorMsg]) "
+                + "     VALUES "
+                + "           ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try {
+            // Disable autocommit
+            conn.setAutoCommit(false);
+        } catch (SQLException ex) {
+            Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> On SetAutoCommit False >> " + ex.getMessage());
+            Logger.getLogger(PersStandardFacade.class.getName()).log(Level.SEVERE, null, ex);
+            getConnectionMannager();
+            return false;
+        }
+
+        /**
+         * Connect PreparedStatement
+         */
+        PreparedStatement ps = null;
+        try {
+            ps = getConnectionMannager().prepareStatement(query);
+        } catch (SQLException ex) {
+            Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> On SetAutoCommit False >> " + ex.getMessage());
+            Logger.getLogger(PersStandardFacade.class.getName()).log(Level.SEVERE, null, ex);
+            getConnectionMannager();
+            return false;
+        }
+
+        /**
+         * For each received tags to persist will check if persistence is
+         * enable. If so will check in the persistence table if settings for
+         * persistence technique and activation was allowed. If so process to
+         * add to batch insert otherwise go to next tags.
+         */
+        int requestCnt = 0;
+        // Check each tags. 
+        for (PersStandard pers : persistence) {
+
+            try {
+                ps.setInt(1, pers.getCompany().getId());
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> Comapay id error !" + ex.getMessage());
+            }
+            try {
+                ps.setInt(2, pers.getTag().getId());
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> tag Id error !" + ex.getMessage());
+            }
+            try {
+                ps.setDouble(3, pers.getVFloat());
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> vFloat error !" + ex.getMessage());
+            }
+            try {
+                ps.setInt(4, pers.getVInt());
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> vInt error !" + ex.getMessage());
+            }
+            try {
+                ps.setBoolean(5, pers.getVBool());
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> vBool error !" + ex.getMessage());
+            }
+            try {
+                ps.setString(6, (pers.getVStr() == null ? "NULL" : pers.getVStr()));
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> vStr error !" + ex.getMessage());
+            }
+            try {
+                ps.setTimestamp(7, Timestamp.valueOf(pers.getVDateTime()));
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> vDateTime error !" + ex.getMessage());
+            }
+            try {
+                ps.setTimestamp(8, Timestamp.valueOf(pers.getVStamp()));
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> 8_ VStamp error !" + ex.getMessage());
+            }
+            try {
+                ps.setTimestamp(9, Timestamp.valueOf(pers.getStampStart()));
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> 9_ VStamp error !" + ex.getMessage());
+            }
+            try {
+                ps.setTimestamp(10, Timestamp.valueOf(pers.getStampEnd()));
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> 10_ VStamp error !" + ex.getMessage());
+            }
+            try {
+                ps.setDouble(11, pers.getTbf());
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> 11_ Double error !" + ex.getMessage());
+            }
+            try {
+                ps.setDouble(12, pers.getTtr());
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> 12_ Double error !" + ex.getMessage());
+            }
+            try {
+                ps.setBoolean(13, pers.getError() == null ? false : pers.getError());
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> 13_ bit Error !" + ex.getMessage());
+            }
+            try {
+                ps.setString(14, (pers.getErrorMsg() == null ? "NULL" : (pers.getErrorMsg().isEmpty() ? "NULL" : pers.getErrorMsg())));
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> 14_ Message error !" + ex.getMessage());
+            }
+
+            try {
+                ps.addBatch();
+//                        if (tag.getId() == 33 || tag.getId() == 34 || tag.getId() == 35) {
+//                            Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> tagId " + tag.getId() + " >>> add to Batch for persistence ! ");
+//                        }
+            } catch (SQLException ex) {
+                Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> add Batch Error !" + ex.getMessage());
+            }
+
+        }
+        requestCnt++;
+
+        // Get result
+        try {
+            int[] count = ps.executeBatch();
+        } catch (SQLException ex) {
+            Util.out(Util.errLine() + getClass().getName() + " >> pushValue >> Erreur on executeBatch " + ex.getMessage());
+            return false;
+        }
+
+        try {
+            // Commit transaction
+            conn.commit();
+        } catch (SQLException ex) {
+            Logger.getLogger(PersStandardFacade.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+
+        try {
+            // Disable autocommit
+            conn.setAutoCommit(false);
+        } catch (SQLException ex) {
+            Logger.getLogger(PersStandardFacade.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
         }
 
         return true;

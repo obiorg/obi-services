@@ -6,11 +6,7 @@ package org.obi.services.Docking;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -39,6 +35,8 @@ public class SettingsApplicationFrame extends javax.swing.JPanel implements Data
      *
      */
     DatabaseFrame dbf = null;
+
+    private Integer persMode = 1;
 
     /**
      * Creates new form SettingsApplicationFrame
@@ -73,13 +71,28 @@ public class SettingsApplicationFrame extends javax.swing.JPanel implements Data
         schemaOBI.setText(urlOBI);
         schemaZen.setText(urlZen);
 
+        // Read Saved Data Pers Mode
+        Object mode = Settings.read(Settings.CONFIG, Settings.PERS_MODE);
+        if (mode == null) {
+            modePushList.setSelected(true);
+        } else {
+            persMode = Integer.valueOf(mode.toString());
+            switch (persMode) {
+                case 1 ->
+                    modePushList.setSelected(true);
+                case 2 ->
+                    modeDataCollectorWriter.setSelected(true);
+                default ->
+                    modePushList.setSelected(true);
+            }
+        }
+
         // Init table model
 //        Object obj = Settings.read(Settings.URL_OBI, Settings.COUNTER);
 //        Integer counter = 0;
 //        if (obj != null) {
 //            counter = Integer.valueOf(obj.toString());
 //        }
-
         // 
 //        this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 //        openFrameCount++; // increment configFrame counter
@@ -97,6 +110,8 @@ public class SettingsApplicationFrame extends javax.swing.JPanel implements Data
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jSeparator3 = new javax.swing.JSeparator();
+        persistenceMode = new javax.swing.ButtonGroup();
         btnSaveConfig = new javax.swing.JButton();
         btnCancelConfig = new javax.swing.JButton();
         jTabbedPane1 = new javax.swing.JTabbedPane();
@@ -129,6 +144,9 @@ public class SettingsApplicationFrame extends javax.swing.JPanel implements Data
         schemaZen = new javax.swing.JTextField();
         btnDBConnectZen = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
+        persistencePanel = new javax.swing.JPanel();
+        modePushList = new javax.swing.JRadioButton();
+        modeDataCollectorWriter = new javax.swing.JRadioButton();
 
         btnSaveConfig.setIcon(Ico.i32("/img/oz/save.png", this));
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("bundles/Fr_fr"); // NOI18N
@@ -330,6 +348,46 @@ public class SettingsApplicationFrame extends javax.swing.JPanel implements Data
             }
         });
 
+        persistencePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Mode Persistence"));
+
+        persistenceMode.add(modePushList);
+        modePushList.setSelected(true);
+        modePushList.setText("Via Direct Push List");
+        modePushList.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                modePushListActionPerformed(evt);
+            }
+        });
+
+        persistenceMode.add(modeDataCollectorWriter);
+        modeDataCollectorWriter.setText("Via Data Collector Writer");
+        modeDataCollectorWriter.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                modeDataCollectorWriterActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout persistencePanelLayout = new javax.swing.GroupLayout(persistencePanel);
+        persistencePanel.setLayout(persistencePanelLayout);
+        persistencePanelLayout.setHorizontalGroup(
+            persistencePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(persistencePanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(persistencePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(modePushList)
+                    .addComponent(modeDataCollectorWriter))
+                .addContainerGap(72, Short.MAX_VALUE))
+        );
+        persistencePanelLayout.setVerticalGroup(
+            persistencePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(persistencePanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(modePushList)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(modeDataCollectorWriter)
+                .addContainerGap(22, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout tabDatabasePanelLayout = new javax.swing.GroupLayout(tabDatabasePanel);
         tabDatabasePanel.setLayout(tabDatabasePanelLayout);
         tabDatabasePanelLayout.setHorizontalGroup(
@@ -351,7 +409,10 @@ public class SettingsApplicationFrame extends javax.swing.JPanel implements Data
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, tabDatabasePanelLayout.createSequentialGroup()
                                 .addComponent(schemaZen)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnDBConnectZen)))))
+                                .addComponent(btnDBConnectZen))))
+                    .addGroup(tabDatabasePanelLayout.createSequentialGroup()
+                        .addComponent(persistencePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         tabDatabasePanelLayout.setVerticalGroup(
@@ -369,7 +430,9 @@ public class SettingsApplicationFrame extends javax.swing.JPanel implements Data
                     .addComponent(schemaZen, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(314, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(persistencePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(209, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Base de données", tabDatabasePanel);
@@ -411,6 +474,10 @@ public class SettingsApplicationFrame extends javax.swing.JPanel implements Data
             ini.put(Settings.CONFIG, Settings.URL_OBI, schemaOBI.getText());
             ini.put(Settings.CONFIG, Settings.URL_ZEN, schemaZen.getText());
 
+            ini.put(Settings.CONFIG, Settings.URL_ZEN, schemaZen.getText());
+
+            ini.put(Settings.CONFIG, Settings.PERS_MODE, persMode);
+
             ini.store();
             JOptionPane.showMessageDialog(this, "Sauvegarde terminée avec succès", "Sauvegarde", JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException ex) {
@@ -430,9 +497,9 @@ public class SettingsApplicationFrame extends javax.swing.JPanel implements Data
         }
         dbf.setLocationRelativeTo(this);
         dbf.setModel(
-            DatabaseModel
-            .parse("Configurations")
-            .parse(schemaOBI.getText()));
+                DatabaseModel
+                        .parse("Configurations")
+                        .parse(schemaOBI.getText()));
         dbf.setSchemaReceiver(schemaOBI);
         dbf.setVisible(true);
     }//GEN-LAST:event_btnDBConnectOBIActionPerformed
@@ -447,6 +514,26 @@ public class SettingsApplicationFrame extends javax.swing.JPanel implements Data
         dbf.setSchemaReceiver(schemaZen);
         dbf.setVisible(true);
     }//GEN-LAST:event_btnDBConnectZenActionPerformed
+
+    private void updatePersistenceMode() {
+        if (modePushList.isSelected()) {
+            persMode = 1;
+        } else if (modeDataCollectorWriter.isSelected()) {
+            persMode = 2;
+        } else {
+            persMode = 1;
+        }
+    }
+
+    private void modePushListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modePushListActionPerformed
+        // TODO add your handling code here:
+        updatePersistenceMode();
+    }//GEN-LAST:event_modePushListActionPerformed
+
+    private void modeDataCollectorWriterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modeDataCollectorWriterActionPerformed
+        // TODO add your handling code here:
+        updatePersistenceMode();
+    }//GEN-LAST:event_modeDataCollectorWriterActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -472,11 +559,16 @@ public class SettingsApplicationFrame extends javax.swing.JPanel implements Data
     private javax.swing.JPanel jPanel8;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSpinner jSpinner19;
     private javax.swing.JSpinner jSpinner20;
     private javax.swing.JSpinner jSpinner21;
     private javax.swing.JSpinner jSpinner22;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JRadioButton modeDataCollectorWriter;
+    private javax.swing.JRadioButton modePushList;
+    private javax.swing.ButtonGroup persistenceMode;
+    private javax.swing.JPanel persistencePanel;
     private javax.swing.JTextField schemaOBI;
     private javax.swing.JTextField schemaZen;
     private javax.swing.JPanel tabCompanyPanel;
@@ -484,8 +576,6 @@ public class SettingsApplicationFrame extends javax.swing.JPanel implements Data
     private javax.swing.JTextField tfCompany;
     // End of variables declaration//GEN-END:variables
 
-    
-    
     @Override
     public void databaseFrameEventValidate(DatabaseModel model) {
         String methodName = getClass().getSimpleName() + Logger.getLogger(Util.class

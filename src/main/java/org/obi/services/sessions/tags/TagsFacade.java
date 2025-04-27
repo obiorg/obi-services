@@ -1,6 +1,5 @@
 package org.obi.services.sessions.tags;
 
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,13 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.obi.services.Form.DatabaseFrame;
 import org.obi.services.app.MachineConnection;
-import org.obi.services.entities.business.Companies;
 import org.obi.services.entities.tags.Tags;
-import org.obi.services.model.DatabaseModel;
 import org.obi.services.sessions.AbstractFacade;
-import org.obi.services.util.DateUtil;
 import org.obi.services.util.Util;
 
 /**

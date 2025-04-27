@@ -13,7 +13,7 @@
     <artifactId>obi-services</artifactId>
     <name>obi-services</name>
     <packaging>jar</packaging>
-    <version>0.1.8</version>
+    <version>0.1.9</version>
     <description>
         Application obi-services
         Allow to get tag value defined. 

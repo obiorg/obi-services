@@ -36,6 +36,7 @@ import org.obi.services.Form.DatabaseInformationsFrame;
 import org.obi.services.Form.output.CapturePane;
 import org.obi.services.Form.output.StreamCapturer;
 import org.obi.services.OBIServiceTrayIcon;
+import org.obi.services.app.DataCollectorWriterThread;
 import org.obi.services.app.ManagerControllerThread;
 import org.obi.services.entities.tags.Tags;
 import org.obi.services.model.DatabaseModel;
@@ -184,6 +185,11 @@ public class MainWindowDocking implements SystemThreadListener {
     ManagerControllerThread managerCtrlThread;
 
     /**
+     * Manager of Data Collector Writer : to process reading in data
+     */
+    DataCollectorWriterThread dataCollectorWriterThread;
+
+    /**
      * Main Windows Pane
      */
     private DockingWindow mainTabWindow = new TabWindow();
@@ -247,6 +253,8 @@ public class MainWindowDocking implements SystemThreadListener {
         this.managerCtrlThread.addMachinesEvent(managerControllerFrame);
         Util.out(Util.errLine() + MainWindowDocking.class.getSimpleName() + " : Application >> Started ...");
 
+        this.dataCollectorWriterThread = new DataCollectorWriterThread();
+        
         if (startMode) {
             Util.out(Util.errLine() + MainWindowDocking.class.getSimpleName() + " : Application >> Auto start service processeing ...");
             startTagCollectorMenuItemActionPerformed(null);
@@ -603,6 +611,20 @@ public class MainWindowDocking implements SystemThreadListener {
                     TrayIcon.MessageType.WARNING);
             Util.out(Util.errLine() + MainWindowDocking.class.getSimpleName() + " : startTagCollectorMenuItem >> Processus is already running. Please stop before start !");
         }
+
+        if (!dataCollectorWriterThread.isRunning()) {
+            dataCollectorWriterThread.doRelease();
+            if (!dataCollectorWriterThread.isAlive()) {
+                dataCollectorWriterThread.start();
+            } else {
+            }
+        } else {
+            trayIcon.displayMessage("OBI",
+                    "DataCollectorWriterThread is already running. Please stop before start !",
+                    TrayIcon.MessageType.WARNING);
+            Util.out(Util.errLine() + MainWindowDocking.class.getSimpleName() + " : startTagCollectorMenuItem >> DataCollectorWriterThread is already running. Please stop before start !");
+        }
+
         startTagCollectorMenuItem.setEnabled(false);
         stopTagCollectorMenuItem.setEnabled(true);
 
@@ -630,6 +652,15 @@ public class MainWindowDocking implements SystemThreadListener {
                     "Processus is already stopped. Please start before any stop !",
                     TrayIcon.MessageType.WARNING);
             Util.out(Util.errLine() + MainWindowDocking.class.getSimpleName() + " : stopTagCollectorMenuItem >> Processus is already stopped. Please start before any stop !");
+        }
+
+        if (dataCollectorWriterThread.isRunning()) {
+            dataCollectorWriterThread.doStop();
+        } else {
+            trayIcon.displayMessage("OBI",
+                    "DataCollectorWriterThread is already stopped. Please start before any stop !",
+                    TrayIcon.MessageType.WARNING);
+            Util.out(Util.errLine() + MainWindowDocking.class.getSimpleName() + " : stopTagCollectorMenuItem >> DataCollectorWriterThread is already stopped. Please start before any stop !");
         }
 
         startTagCollectorMenuItem.setEnabled(true);
@@ -1026,8 +1057,7 @@ public class MainWindowDocking implements SystemThreadListener {
             }
         });
         managerControllerMenuItem.setEnabled(true);
-        
-        
+
         //> TOOLS MENU - threadMenuItem
         threadMenuItem = new JMenuItem();
         threadMenuItem.setIcon(Ico.i16("/img/std/thread.png", this));

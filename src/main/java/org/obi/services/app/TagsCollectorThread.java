@@ -144,6 +144,7 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
     }
 
     PushFacadeThread pushFacadeThread; //TagsFacadeThread.getInstance();
+    DataCollectorThread dataCollectorThread; //
 
     /**
      * Main loop of the thread data collector
@@ -170,15 +171,29 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
         Integer gmtIndex = Integer.valueOf(Settings.read(Settings.CONFIG, Settings.GMT).toString());
         Integer companyId = Integer.valueOf(Settings.read(Settings.CONFIG, Settings.COMPANY).toString());
 
+        Integer persMode = Integer.valueOf(Settings.read(Settings.CONFIG, Settings.PERS_MODE).toString());
+
         /**
          * Create Sub process to write in database
          */
+        pushFacadeThread = new PushFacadeThread(machine.getName() + "_pf");
         pushFacadeThread.doRelease();
         pushFacadeThread.addClientListener(this);
         if (!pushFacadeThread.isAlive()) {
             pushFacadeThread.start();
         }
         Util.out(Util.errLine() + methodName + "Thead(" + getName() + ") of machine(" + machine.getName() + ") as pushFacadeThread (" + pushFacadeThread.getName() + ")");
+        /**
+         * Create Sub process to write in file
+         */
+        dataCollectorThread = new DataCollectorThread(machine.getName());
+        dataCollectorThread.setMachine(machine);
+        dataCollectorThread.doRelease();
+        dataCollectorThread.addClientListener(this);
+        if (!dataCollectorThread.isAlive()) {
+            dataCollectorThread.start();
+        }
+        Util.out(Util.errLine() + methodName + "Thead(" + getName() + ") of machine(" + machine.getName() + ") as dataCollectorThread (" + dataCollectorThread.getName() + ")");
 
         /**
          * Create Sub process to write in database
@@ -247,6 +262,8 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
 
                 // release PushFacadeThread
                 pushFacadeThread.doRelease();
+
+                dataCollectorThread.doRelease();
 
                 // release fetchFacadeThread
                 fetchFacadeThread.doRelease();
@@ -364,7 +381,11 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
                                     if (t != null
                                             && tag.getVFloat() != null && tag.getVInt() != null
                                             && !Double.isNaN(tag.getVFloat())) {
-                                        pushFacadeThread.addNewTag(tag); // in order to post-pose processing.
+                                        if (persMode == 1) {
+                                            pushFacadeThread.addNewTag(tag); // in order to post-pose processing.
+                                        } else if (persMode == 2) {
+                                            dataCollectorThread.addTag(tag);
+                                        }
                                     } else {
                                         mc.close();
                                         for (int j = 0; j < systemThreadListeners.size(); j++) {
@@ -432,6 +453,7 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
 
                 // stop PushFacadeThread
                 pushFacadeThread.doStop();
+                dataCollectorThread.doStop();
 
                 // stop fetchFacadeThread
                 fetchFacadeThread.doStop();
@@ -493,6 +515,19 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
         }
         Util.out(Util.errLine() + methodName + " >> on Machine " + machine.getName() + " : pushFacadeThread killed !");
 
+        // Release PushFacadeThread
+        while (dataCollectorThread.isAlive()) {
+            dataCollectorThread.doStop();
+            dataCollectorThread.kill();
+            Util.out(Util.errLine() + methodName + " >> on Machine " + machine.getName() + " : ... wait dataCollectorThread to finish !");
+            try {
+                sleep(500);
+            } catch (InterruptedException ex) {
+                Util.out(Util.errLine() + methodName + " >> on Machine " + machine.getName() + " : Error will sleeping in order to kill thread dataCollectorThread !");
+            }
+        }
+        Util.out(Util.errLine() + methodName + " >> on Machine " + machine.getName() + " : dataCollectorThread killed !");
+
         // Release fetchFacadeThread
         while (fetchFacadeThread.isAlive()) {
             fetchFacadeThread.doStop();
@@ -504,7 +539,7 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
                 Util.out(Util.errLine() + methodName + " >> on Machine " + machine.getName() + " : Error will sleeping in order to kill thread fetchFacadeThread !");
             }
         }
-        Util.out(Util.errLine() + methodName + " >> on Machine " + machine.getName() + " : pushFacadeThread killed !");
+        Util.out(Util.errLine() + methodName + " >> on Machine " + machine.getName() + " : fetchFacadeThread killed !");
 
         /**
          * Will kill tags collector controller : inform all client
