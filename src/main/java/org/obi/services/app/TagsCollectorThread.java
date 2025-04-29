@@ -180,7 +180,9 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
         pushFacadeThread.doRelease();
         pushFacadeThread.addClientListener(this);
         if (!pushFacadeThread.isAlive()) {
-            pushFacadeThread.start();
+            if (persMode == 1) {
+                pushFacadeThread.start();
+            }
         }
         Util.out(Util.errLine() + methodName + "Thead(" + getName() + ") of machine(" + machine.getName() + ") as pushFacadeThread (" + pushFacadeThread.getName() + ")");
         /**
@@ -191,7 +193,9 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
         dataCollectorThread.doRelease();
         dataCollectorThread.addClientListener(this);
         if (!dataCollectorThread.isAlive()) {
-            dataCollectorThread.start();
+            if (persMode == 2) {
+                dataCollectorThread.start();
+            }
         }
         Util.out(Util.errLine() + methodName + "Thead(" + getName() + ") of machine(" + machine.getName() + ") as dataCollectorThread (" + dataCollectorThread.getName() + ")");
 

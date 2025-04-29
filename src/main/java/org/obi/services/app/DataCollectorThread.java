@@ -231,19 +231,19 @@ public class DataCollectorThread extends Thread {
     }
 
     public void writeAsPers_Standard() throws IOException {
-        FileWriter fw = new FileWriter("./DataCollector/ps_" + machine.getName() + ".csv", true);
+        FileWriter fw = new FileWriter("./DataCollector/ps_" + machine.getName() + ".data", true);
         PrintWriter pw = new PrintWriter(fw);
 
         // Process each txTags
         txTags.forEach(tag -> {
 //            Util.out(Util.errLine() + " writeAsPers >> " + tag.toStringFull()  );
-            pw.printf(" %d, %d, %.6f, %d, %s, %s, %s, %s, %s, %s, %f, %f, %s, %s ;",
+            pw.printf("%d; %d; %.6f; %d; %s; %s; %s; %s; %s; %s; %f; %f; %s; %s #",
                     tag.getCompany().getId(), // companyId
                     tag.getId(), // id tag
                     tag.getVFloat(), // vFloat
                     tag.getVInt(), // vInt
                     tag.getVBool().toString(), // vBool
-                    tag.getVStr(), // vStr
+                    "'" + tag.getVStr() + "'", // vStr
                     tag.getVDateTime().toString(), // vDateTime
                     tag.getVStamp().toString(), // vStamp
                     tag.getVStamp().toString(), // vStampStart

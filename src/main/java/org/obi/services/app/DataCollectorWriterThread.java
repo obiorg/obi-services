@@ -52,35 +52,6 @@ public class DataCollectorWriterThread extends Thread {
     private Machines machine;
 
     /**
-     * Received Tags
-     */
-    private List<Tags> rxTags = new ArrayList<>();
-
-    /**
-     * Transmit Tags
-     */
-    private List<Tags> txTags = new ArrayList<>();
-    private boolean NO_ERROR = true;
-
-    /**
-     * Add received tags to the list of received tags rxTags
-     *
-     * @param receivedTags newly received tags
-     */
-    public void addTags(List<Tags> receivedTags) {
-        rxTags.addAll(receivedTags);
-    }
-
-    /**
-     * Add received tag to the list of received tags rxTags
-     *
-     * @param receivedTag one tag newly received
-     */
-    public void addTag(Tags receivedTag) {
-        rxTags.add(receivedTag);
-    }
-
-    /**
      * Array list which contain all the TagsFacadeThreadListener listeners that
      * should receive event from client class
      */
@@ -185,7 +156,7 @@ public class DataCollectorWriterThread extends Thread {
             PersStandardFacade pft = PersStandardFacade.getInstance();
 
             // SUB PROCESS LOOP
-            while (!requestStop & !requestKill & !wait & !rxTags.isEmpty()) {
+            while (!requestStop & !requestKill & !wait) {
                 // Inform sub thread only once it reach this after exuction of subprocess 
                 if (running == false) {
                     for (int i = 0; i < systemThreadListeners.size(); i++) {
@@ -201,8 +172,9 @@ public class DataCollectorWriterThread extends Thread {
 
                 // Copy All file to directory 
                 if (processingDone) {
-                    moveFilesFromOneDirToAnother(dirFrom, dirTo);
-                    processingDone = false;
+                    if (moveFilesFromOneDirToAnother(dirFrom, dirTo)) {
+                        processingDone = false;
+                    }
                 }
                 // Load All file in to memory statement
                 List<PersStandard> pers = new ArrayList<>();
@@ -250,39 +222,6 @@ public class DataCollectorWriterThread extends Thread {
         }
 
         Util.out(Util.errLine() + methodName + " Terminate tag collector Controller Thread");
-    }
-
-    public void writeAsPers_Standard() throws IOException {
-        FileWriter fw = new FileWriter("./DataCollector/ps_" + machine.getName() + ".csv", true);
-        PrintWriter pw = new PrintWriter(fw);
-
-        // Process each txTags
-        txTags.forEach(tag -> {
-//            Util.out(Util.errLine() + " writeAsPers >> " + tag.toStringFull()  );
-            pw.printf(" %d, %d, %.6f, %d, %s, %s, %s, %s, %s, %s, %f, %f, %s, %s ;",
-                    tag.getCompany().getId(), // companyId
-                    tag.getId(), // id tag
-                    tag.getVFloat(), // vFloat
-                    tag.getVInt(), // vInt
-                    tag.getVBool().toString(), // vBool
-                    tag.getVStr(), // vStr
-                    tag.getVDateTime().toString(), // vDateTime
-                    tag.getVStamp().toString(), // vStamp
-                    tag.getVStamp().toString(), // vStampStart
-                    tag.getVStamp().toString(), // vStampEnd
-                    0.0, // tbf
-                    0.0, // ttr
-                    (tag.getError() == null ? "false" : tag.getError().toString()), // error
-                    (tag.getErrorMsg() == null ? "NULL" : (tag.getErrorMsg().isEmpty() ? "NULL" : tag.getErrorMsg())) // error Message
-            );
-        });
-
-        // Fermeture du fichier
-        pw.close();
-
-        // Clear TxTags
-        txTags.clear();
-
     }
 
     public Machines getMachine() {
@@ -355,7 +294,7 @@ public class DataCollectorWriterThread extends Thread {
                 // Iterate through all entries (files and subdirectories) in the source directory
                 for (Path entry : stream) {
                     // Check if the current entry is a regular file (not a directory)
-                    if (Files.isRegularFile(entry)) {
+                    //if (Files.isRegularFile(entry)) {
                         Path destinationFile = destinationDirectory.resolve(entry.getFileName());
                         try {
                             // Move the file to the destination directory
@@ -369,7 +308,7 @@ public class DataCollectorWriterThread extends Thread {
 //                            System.err.println("Failed to move file: " + entry.getFileName());
                             e.printStackTrace();
                         }
-                    }
+                    //}
                 }
 //                System.out.println("Finished attempting to move files from: " + sourceDirectory.toAbsolutePath());
             } catch (IOException e) {
@@ -413,7 +352,7 @@ public class DataCollectorWriterThread extends Thread {
                     // Check if the current entry is a regular file (not a directory)
                     if (Files.isRegularFile(entry)) {
                         Path filename = entry.getFileName();
-                        List<PersStandard> readedPersStandards = filesToPersStandards(entry.getFileName());//                            System.err.println("Failed to move file: " + entry.getFileName());
+                        List<PersStandard> readedPersStandards = filesToPersStandards(dirProcesing + "/" + entry.getFileName());//                            System.err.println("Failed to move file: " + entry.getFileName());
                         if (readedPersStandards != null && !readedPersStandards.isEmpty()) {
                             pers.addAll(readedPersStandards);
                         }
@@ -444,12 +383,12 @@ public class DataCollectorWriterThread extends Thread {
      * @param fileNamePath Path of the file to read
      * @return null if error file exist or reading file
      */
-    private List<PersStandard> filesToPersStandards(Path fileNamePath) {
+    private List<PersStandard> filesToPersStandards(String fileName) {
         // Define the path to the file you want to read
         // Replace "your_file.txt" with the actual name and path of your file
-//        String filePathString = "your_file.txt";
-//        Path filePath = Paths.get(filePathString);
-        Path filePath = fileNamePath;
+        String filePathString = fileName;
+        Path filePath = Paths.get(filePathString);
+//        Path filePath = fileNamePath;
 
         List<PersStandard> persStandardList = new ArrayList<>();
 
@@ -457,7 +396,7 @@ public class DataCollectorWriterThread extends Thread {
         Integer companyId = Integer.valueOf(Settings.read(Settings.CONFIG, Settings.COMPANY).toString());
 
         // Check if the file exists
-        if (Files.exists(filePath) && Files.isRegularFile(filePath)) {
+        if (Files.exists(filePath)) { //&& Files.isRegularFile(filePath)
             try (BufferedReader br = new BufferedReader(new FileReader(filePath.toFile()))) {
                 String line;
                 // Read the file line by line
@@ -471,7 +410,7 @@ public class DataCollectorWriterThread extends Thread {
                     }
 
                     // Split the line into individual items using ";" as the delimiter
-                    String[] items = line.split(";");
+                    String[] items = line.split("#");
 
                     for (String item : items) {
                         // Remove leading/trailing whitespace from each item
@@ -483,7 +422,7 @@ public class DataCollectorWriterThread extends Thread {
                         }
 
                         // Split each item into fields using "," as the delimiter
-                        String[] fields = item.split(",");
+                        String[] fields = item.split(";");
 
                         // Check if the number of fields matches the expected structure (14 fields based on your printf)
                         if (fields.length == 14) {
