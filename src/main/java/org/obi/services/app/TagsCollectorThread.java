@@ -146,6 +146,8 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
     PushFacadeThread pushFacadeThread; //TagsFacadeThread.getInstance();
     DataCollectorThread dataCollectorThread; //
 
+    KafkaProducerThread kafkaProducerThread;
+
     /**
      * Main loop of the thread data collector
      */
@@ -185,6 +187,24 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
             }
         }
         Util.out(Util.errLine() + methodName + "Thead(" + getName() + ") of machine(" + machine.getName() + ") as pushFacadeThread (" + pushFacadeThread.getName() + ")");
+
+        /**
+         * Create Sub process to kafka Producer
+         */
+        String bootstrapServers = "localhost:7092"; // Adresse du broker Kafka
+        String topic = "PersStandard";
+        kafkaProducerThread = new KafkaProducerThread(machine.getName() + "_kafkaProducer",
+                bootstrapServers, topic);
+        kafkaProducerThread.doRelease();
+        kafkaProducerThread.addClientListener(this);
+        if (!kafkaProducerThread.isAlive()) {
+            if (persMode == 1) {
+                kafkaProducerThread.start();
+            }
+        }
+        Util.out(Util.errLine() + methodName + "Thead(" + getName() + ") of machine(" + machine.getName() + ") as kafkaProducerThread (" + kafkaProducerThread.getName() + ")");
+
+        
         /**
          * Create Sub process to write in file
          */
@@ -267,6 +287,7 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
                 // release PushFacadeThread
                 pushFacadeThread.doRelease();
 
+                kafkaProducerThread.doRelease();
                 dataCollectorThread.doRelease();
 
                 // release fetchFacadeThread
@@ -387,6 +408,7 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
                                             && !Double.isNaN(tag.getVFloat())) {
                                         if (persMode == 1) {
                                             pushFacadeThread.addNewTag(tag); // in order to post-pose processing.
+                                            kafkaProducerThread.addTag(tag);
                                         } else if (persMode == 2) {
                                             dataCollectorThread.addTag(tag);
                                         }
@@ -457,6 +479,7 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
 
                 // stop PushFacadeThread
                 pushFacadeThread.doStop();
+                kafkaProducerThread.doStop();
                 dataCollectorThread.doStop();
 
                 // stop fetchFacadeThread
@@ -519,7 +542,21 @@ public class TagsCollectorThread extends Thread implements MachinesListener, Fet
         }
         Util.out(Util.errLine() + methodName + " >> on Machine " + machine.getName() + " : pushFacadeThread killed !");
 
-        // Release PushFacadeThread
+        // Release kafka Producer
+        while (kafkaProducerThread.isAlive()) {
+            kafkaProducerThread.doStop();
+            kafkaProducerThread.kill();
+            Util.out(Util.errLine() + methodName + " >> on Machine " + machine.getName() + " : ... wait kafkaProducerThread to finish !");
+            try {
+                sleep(500);
+            } catch (InterruptedException ex) {
+                Util.out(Util.errLine() + methodName + " >> on Machine " + machine.getName() + " : Error will sleeping in order to kill thread kafkaProducerThread !");
+            }
+        }
+        Util.out(Util.errLine() + methodName + " >> on Machine " + machine.getName() + " : kafkaProducerThread killed !");
+
+
+        // Release dataCollectorThread
         while (dataCollectorThread.isAlive()) {
             dataCollectorThread.doStop();
             dataCollectorThread.kill();

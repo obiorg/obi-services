@@ -4,6 +4,11 @@
  */
 package org.obi.services.entities.tags;
 
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import org.obi.services.entities.persistence.PersStandardLimits;
 import org.obi.services.entities.persistence.Persistence;
 import org.obi.services.entities.persistence.PersStandard;
@@ -14,6 +19,7 @@ import org.obi.services.entities.business.Companies;
 import org.obi.services.entities.analyses.AnalyseAllowed;
 import org.obi.services.entities.alarms.Alarms;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -706,9 +712,7 @@ public class Tags implements Serializable {
 //        return "org.obi.services.entities.Tags[ id=" + id + " ]";
         return "" + this.name + " - " + this.getMachine().getName() + " [ id=" + id + " ]";
     }
-    
 
-    
     public String toStringFull() {
 //        return "org.obi.services.entities.Tags[ id=" + id + " ]";
         return "" + this.name + " - " + this.getMachine().getName() + " [ id=" + id + " ] "
@@ -720,9 +724,6 @@ public class Tags implements Serializable {
                 + " " + this.vInt + " ";
     }
 
-    
-    
-    
     /**
      * Allow to affect result object
      *
@@ -1122,5 +1123,6 @@ public class Tags implements Serializable {
 
         return stmts;
     }
+
 
 }

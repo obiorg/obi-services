@@ -4,8 +4,16 @@
  */
 package org.obi.services.entities.persistence;
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import org.obi.services.entities.business.Companies;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -361,6 +369,58 @@ public class PersStandard implements Serializable {
                 System.out.println(getClass().getSimpleName() + " >> update >> unknown column name " + c);
             }
 
+        }
+    }
+
+    public static class Serializer implements JsonSerializer<PersStandard> {
+
+        @Override
+        public JsonElement serialize(PersStandard src, Type typeOfSrc, JsonSerializationContext context) {
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.add("company", context.serialize(src.getCompany().getId()));
+            jsonObject.add("tag", context.serialize(src.getTag().getId()));
+            jsonObject.add("vFloat", context.serialize(src.getVFloat()));
+            jsonObject.add("vInt", context.serialize(src.getVInt()));
+            jsonObject.add("vBool", context.serialize(src.getVBool()));
+            jsonObject.add("vStr", context.serialize(src.getVStr(), String.class));
+            jsonObject.add("vDateTime", context.serialize(src.getVDateTime(), LocalDateTime.class));
+            jsonObject.add("vStamp", context.serialize(src.getVStamp(), LocalDateTime.class));
+            jsonObject.add("StampStart", context.serialize(src.getVStamp(), LocalDateTime.class));
+            jsonObject.add("StampEnd", context.serialize(src.getVStamp(), LocalDateTime.class));
+            jsonObject.add("tbf", context.serialize(0.0));
+            jsonObject.add("ttr", context.serialize(0.0));
+            jsonObject.add("error", context.serialize(src.getError()));
+            jsonObject.add("errorMsg", context.serialize(src.getErrorMsg(), String.class));
+
+            return jsonObject;
+        }
+
+    }
+
+    public static class Deserializer implements JsonDeserializer<PersStandard> {
+
+        @Override
+        public PersStandard deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext ctx) throws JsonParseException {
+            JsonObject jsonObject = json.getAsJsonObject();
+
+            PersStandard p = new PersStandard();
+            
+            p.setCompany(new Companies(ctx.deserialize(jsonObject.get("company"), Integer.class)));
+            p.setTag(new Tags(ctx.deserialize(jsonObject.get("tag"), Integer.class)));
+            p.setVFloat(ctx.deserialize(jsonObject.get("vFloat"), Double.class));
+            p.setVInt(ctx.deserialize(jsonObject.get("vInt"), Integer.class));
+            p.setVBool(ctx.deserialize(jsonObject.get("vBool"), Boolean.class));
+            p.setVStr(ctx.deserialize(jsonObject.get("vStr"), String.class));
+            p.setVDateTime(ctx.deserialize(jsonObject.get("vDateTime"), LocalDateTime.class));
+            p.setVStamp(ctx.deserialize(jsonObject.get("vStamp"), LocalDateTime.class));
+            p.setStampStart(ctx.deserialize(jsonObject.get("StampStart"), LocalDateTime.class));
+            p.setStampEnd(ctx.deserialize(jsonObject.get("StampEnd"), LocalDateTime.class));
+            p.setTbf(ctx.deserialize(jsonObject.get("tbf"), Double.class));
+            p.setTtr(ctx.deserialize(jsonObject.get("ttr"), Double.class));
+            p.setError(ctx.deserialize(jsonObject.get("error"), Boolean.class));
+            p.setErrorMsg(ctx.deserialize(jsonObject.get("errorMsg"), String.class));
+            
+            return p;
         }
     }
 

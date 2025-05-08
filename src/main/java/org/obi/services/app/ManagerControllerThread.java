@@ -39,6 +39,9 @@ public class ManagerControllerThread extends Thread implements SystemThreadListe
     private boolean requestKill = false;
     private boolean running = false;
 
+    // Process Saving
+    KafkaToSQLServerThread kafkaToSQLServerThread;
+
     //!< List of machines already managed by Manager controller
     List<TagsCollectorThread> tagsCollectorManaged = new ArrayList<>();
 
@@ -167,6 +170,24 @@ public class ManagerControllerThread extends Thread implements SystemThreadListe
         // Thread tools
         boolean firstTimeInProcessing = true;   //< Inidcate run loop go back at first in main processing loop
 
+        String kafka_name = "obi";
+        String bootstrapServers = "localhost:7092"; // Adresse du broker Kafka
+        String kafka_groupId = "grpPersStandard";
+        String topic = "PersStandard";
+        /**
+         * Create Sub process to kafka Producer
+         */
+        kafkaToSQLServerThread = new KafkaToSQLServerThread(kafka_name,
+                bootstrapServers, kafka_groupId, topic);
+        kafkaToSQLServerThread.doRelease();
+        kafkaToSQLServerThread.addClientListener(this);
+        if (!kafkaToSQLServerThread.isAlive()) {
+            //if (persMode == 1) {
+                kafkaToSQLServerThread.start();
+            //}
+        }
+        Util.out(Util.errLine() + methodName + "Thead(" + getName() + ") of  as kafkaToSQLServerThread (" + kafkaToSQLServerThread.getName() + ")");
+
         /**
          * Start running sub process
          */
@@ -208,6 +229,8 @@ public class ManagerControllerThread extends Thread implements SystemThreadListe
                 for (MachinesEvent machinesControllerEvent : machinesControllerEvents) {
                     machinesControllerEvent.countEvent(machines.size());
                 }
+
+                kafkaToSQLServerThread.doRelease();
 
                 // Actualize machine managed list
                 // 1. Remove deleted connection from managed list
@@ -323,6 +346,8 @@ public class ManagerControllerThread extends Thread implements SystemThreadListe
 
             // sub process stop running
             running = false; //!< indicate end of processus running
+
+            kafkaToSQLServerThread.doStop();
 
             /**
              * Manage testing time of new machine insert or remove. Default
